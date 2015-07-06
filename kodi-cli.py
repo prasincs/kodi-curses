@@ -54,8 +54,6 @@ def get_addons():
   return r.json()
 
 
-
-
 def get_param(prompt_string):
      screen.clear()
      screen.border(1)
@@ -66,7 +64,6 @@ def get_param(prompt_string):
 
 def addons_list(switch_window):
   screen = curses.initscr()
-  screen.border(0)
   response = get_addons()
   x = 0
   items_per_page=15
@@ -76,18 +73,21 @@ def addons_list(switch_window):
     current_page = 0
     start_idx = 0 
     end_idx = start_idx+items_per_page
-
-
+    selected_idx = 0
     while x != ord('Q'):
       start_idx= current_page*items_per_page
       end_idx = start_idx+items_per_page
       if end_idx > len(addons):
         end_idx = len(addons)
       screen.clear()
-      screen.addstr(0, 1, "{}/{} Page. N=Previous,n=Next,Q=Exit".format(current_page,pages))
+      screen.border(0)
+      screen.addstr(1, 2, "{}/{} Page. N=Previous,n=Next,Q=Exit,e=Execute".format(current_page,pages))
       for idx,addon in enumerate(addons[start_idx:end_idx]):
         enabled='True' if addon['enabled'] else 'False'
-        screen.addstr(2+idx, 2, str(' | '.join([addon['addonid'], addon['summary'], enabled])))
+        if selected_idx == idx:
+          screen.addstr(3+idx, 2, str(' | '.join([addon['addonid'], addon['summary'], enabled])), curses.A_STANDOUT)
+        else:
+          screen.addstr(3+idx, 2, str(' | '.join([addon['addonid'], addon['summary'], enabled])))
       screen.refresh()
       x = screen.getch()
       if x == ord('n'):
@@ -98,9 +98,22 @@ def addons_list(switch_window):
         current_page -= 1
         if current_page < 0:
           current_page = 0
+      if x == 66: 
+        selected_idx +=1
+        if selected_idx >= (end_idx - start_idx):
+          selected_idx = 0
+      if x == 65:
+        selected_idx -=1
+        if selected_idx < 0:
+          selected_idx = (end_idx - start_idx)-1
+
+      if x == ord('e'):
+        addon = addons[start_idx+selected_idx]
+        send_player_command("Addons.ExecuteAddon", addonid=addon['addonid'])
+        x = ord('Q')
+        screen.clear()
 
   globals()[switch_window['previous']](None)
-
 
 
 def main_window(switch_window=None):
@@ -119,7 +132,7 @@ def main_window(switch_window=None):
        screen.addstr(9, 4, "b or q: Back")
        screen.addstr(10, 4, "h: Home")
        screen.addstr(11, 4, "m: Context Menu")
-       screen.addstr(12, 4, "A: List Addons")
+       screen.addstr(12, 4, "L: List Addons")
        screen.addstr(2, 54, "------------ Media Controls ---------- ")
        screen.addstr(4, 54, "p: Play/Pause")
        screen.addstr(5, 54, "f: Full Screen")
@@ -166,7 +179,7 @@ def main_window(switch_window=None):
          send_player_command("Player.Stop", playerid=0)
 
 
-       if x == ord('A'):
+       if x == ord('L'):
            switch_window = {'next': 'addons_list',
                             'previous': 'main_window'}
          
