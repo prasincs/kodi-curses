@@ -23,6 +23,15 @@ def send_input_command(cmd):
   return requests.request("POST", url, data=payload, headers=headers)
 
 
+def send_player_command(cmd, **kwargs):
+  payload = json.dumps({"jsonrpc": "2.0", 
+                        "method": cmd,
+                        "id": 1,
+                        "params": kwargs})
+  return requests.request("POST", url, data=payload, headers=headers)
+
+
+
 send_input_command("Input.Down")
 
 def get_param(prompt_string):
@@ -43,13 +52,18 @@ while x != ord('q'):
      screen.border(0)
      screen.addstr(2, 2, "Move... (Arrow keys also work for navigation)")
      screen.addstr(4, 4, "w: Up")
-     screen.addstr(5, 4, "a: Down")
-     screen.addstr(6, 4, "s: Left")
+     screen.addstr(5, 4, "a: Left")
+     screen.addstr(6, 4, "s: Down")
      screen.addstr(7, 4, "d: Right")
      screen.addstr(8, 4, "g: Select")
      screen.addstr(9, 4, "b: Back")
      screen.addstr(10, 4, "h: Home")
-     screen.addstr(11, 4, "q: Exit")
+     screen.addstr(2, 54, "------------ Media Controls ---------- ")
+     screen.addstr(4, 54, "p: Play/Pause")
+     screen.addstr(5, 54, "f: Full Screen")
+     screen.addstr(6, 54, "X: Stop")
+
+     screen.addstr(12, 4, "q: Exit")
 
      screen.refresh()
      
@@ -77,4 +91,16 @@ while x != ord('q'):
 
      if x == ord('b'):
        send_input_command("Input.Back")
+
+
+     if x == ord('b'):
+       send_input_command("Input.Back")
+     if x == ord('p'):
+       send_player_command("Player.PlayPause", playerid=0)
+
+     if x == ord('f'):
+       send_player_command("GUI.SetFullscreen", fullscreen=True)
+
+     if x == ord('X'):
+       send_player_command("Player.Stop", playerid=0)
 curses.endwin()
