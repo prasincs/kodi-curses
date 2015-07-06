@@ -172,6 +172,7 @@ def main_window(switch_window=None):
          
   if switch_window == None:
     curses.endwin()
+    screen.clear()
   else:
     globals()[switch_window['next']](switch_window)
 
