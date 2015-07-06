@@ -45,7 +45,7 @@ def get_param(prompt_string):
 
 x = 0
 
-while x != ord('q'):
+while x != ord('Q'):
      screen = curses.initscr()
      curses.echo()  
      screen.clear()
@@ -56,14 +56,14 @@ while x != ord('q'):
      screen.addstr(6, 4, "s: Down")
      screen.addstr(7, 4, "d: Right")
      screen.addstr(8, 4, "g: Select")
-     screen.addstr(9, 4, "b: Back")
+     screen.addstr(9, 4, "b or q: Back")
      screen.addstr(10, 4, "h: Home")
      screen.addstr(2, 54, "------------ Media Controls ---------- ")
      screen.addstr(4, 54, "p: Play/Pause")
      screen.addstr(5, 54, "f: Full Screen")
      screen.addstr(6, 54, "X: Stop")
 
-     screen.addstr(12, 4, "q: Exit")
+     screen.addstr(12, 4, "Q: Exit")
 
      screen.refresh()
      
@@ -89,12 +89,9 @@ while x != ord('q'):
      if x == ord('h'):
        send_input_command("Input.Home")
 
-     if x == ord('b'):
+     if x == ord('b') or x == ord('q'):
        send_input_command("Input.Back")
-
-
-     if x == ord('b'):
-       send_input_command("Input.Back")
+     
      if x == ord('p'):
        send_player_command("Player.PlayPause", playerid=0)
 
