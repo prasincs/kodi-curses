@@ -1,6 +1,7 @@
 # Kodi CLI 
 
 For navigating from commandline. This is a very simple application written so I didn't have to reach to a remote control while watching tv. Might add a few things as needed.
+
 You'll have to install the JSON-RPC service from settings in Kodi.
 
 
