@@ -25,7 +25,7 @@ Only "requests" library is used other than curses. In case I'll add more things,
 
 ## Run the application
 
-`python kodi.cli`
+`python kodi-cli.py`
 
 ### ???
 
