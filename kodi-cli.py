@@ -2,6 +2,8 @@
 
 # See: http://www.tuxradar.com/content/code-project-build-ncurses-ui-python
 # See: http://kodi.wiki/view/JSON-RPC_API/v6
+# See: https://docs.python.org/2/howto/curses.html
+# See: https://docs.python.org/2/library/curses.html#functions
 from os import system
 import curses
 import requests
@@ -64,6 +66,7 @@ def get_param(prompt_string):
 
 def addons_list(switch_window):
   screen = curses.initscr()
+  screen.keypad(1)
   response = get_addons()
   x = 0
   items_per_page=15
@@ -81,7 +84,7 @@ def addons_list(switch_window):
         end_idx = len(addons)
       screen.clear()
       screen.border(0)
-      screen.addstr(1, 2, "{}/{} Page. N=Previous,n=Next,Q=Exit,e=Execute".format(current_page,pages))
+      screen.addstr(1, 2, "{}/{} Page. N=Previous,n=Next,Q=Exit,g/return=Execute".format(current_page,pages))
       for idx,addon in enumerate(addons[start_idx:end_idx]):
         enabled='True' if addon['enabled'] else 'False'
         if selected_idx == idx:
@@ -98,16 +101,16 @@ def addons_list(switch_window):
         current_page -= 1
         if current_page < 0:
           current_page = 0
-      if x == 66: 
+      if x == curses.KEY_DOWN: 
         selected_idx +=1
         if selected_idx >= (end_idx - start_idx):
           selected_idx = 0
-      if x == 65:
+      if x == curses.KEY_UP:
         selected_idx -=1
         if selected_idx < 0:
           selected_idx = (end_idx - start_idx)-1
 
-      if x == ord('e'):
+      if x == ord('g') or x == 10:
         addon = addons[start_idx+selected_idx]
         send_player_command("Addons.ExecuteAddon", addonid=addon['addonid'])
         x = ord('Q')
@@ -120,15 +123,17 @@ def main_window(switch_window=None):
   x = 0
   while x != ord('Q') and switch_window==None:
        screen = curses.initscr()
-       #curses.echo()  
+       curses.cbreak()
+       curses.noecho()  
        screen.clear()
+       screen.keypad(1)
        screen.border(0)
        screen.addstr(2, 2, "Move... (Arrow keys also work for navigation)")
        screen.addstr(4, 4, "w: Up")
        screen.addstr(5, 4, "a: Left")
        screen.addstr(6, 4, "s: Down")
        screen.addstr(7, 4, "d: Right")
-       screen.addstr(8, 4, "g: Select")
+       screen.addstr(8, 4, "g/return: Select")
        screen.addstr(9, 4, "b or q: Back")
        screen.addstr(10, 4, "h: Home")
        screen.addstr(11, 4, "m: Context Menu")
@@ -144,20 +149,20 @@ def main_window(switch_window=None):
        
        x = screen.getch()
 
-       if x == ord('w') or x == 65:
+       if x == ord('w') or x == curses.KEY_UP:
         send_input_command("Input.Up")
 
 
-       if x == ord('a') or x == 68:
+       if x == ord('a') or x == curses.KEY_LEFT:
         send_input_command("Input.Left")
    
-       if x == ord('s') or x == 66:
+       if x == ord('s') or x == curses.KEY_DOWN:
         send_input_command("Input.Down")
 
-       if x == ord('d') or x == 67:
+       if x == ord('d') or x == curses.KEY_RIGHT:
          send_input_command("Input.Right")
 
-       if x == ord('g'):
+       if x == ord('g') or x == 10:
          send_input_command("Input.Select")
        
        if x == ord('h'):
@@ -182,9 +187,13 @@ def main_window(switch_window=None):
        if x == ord('L'):
            switch_window = {'next': 'addons_list',
                             'previous': 'main_window'}
+
          
   if switch_window == None:
     curses.endwin()
+    curses.nocbreak() 
+    screen.keypad(0)
+    curses.echo()
     screen.clear()
   else:
     globals()[switch_window['next']](switch_window)
